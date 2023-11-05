@@ -10,9 +10,9 @@ namespace XsisPG.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly MovieDbContext _context;
+        private readonly MovieDbContext _context; //add field
 
-        public MoviesController(MovieDbContext context)
+        public MoviesController(MovieDbContext context) //add filed _context
         { 
             _context = context;
         }
@@ -21,7 +21,7 @@ namespace XsisPG.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IEnumerable<Movie>> Get()
         {
-            return await _context.Movies.OrderBy(c=>c.Id).ToListAsync();
+            return await _context.Movies.OrderBy(c=>c.Id).ToListAsync(); //lookup all data (select*) then order data by column id, you can change later eg:create date etc
         }
 
         [HttpGet("{id}")]
@@ -29,8 +29,8 @@ namespace XsisPG.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
-            var res= await _context.Movies.FindAsync(id);
-            return res == null? NotFound() : Ok(res);
+            var res= await _context.Movies.FindAsync(id); //lookup data
+            return res == null? NotFound() : Ok(res); // if found data or not null then return result
         }
 
         [HttpPost]
@@ -38,9 +38,9 @@ namespace XsisPG.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(Movie movie)
         {
-            await _context.Movies.AddAsync(movie);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new {movie.Id},movie);
+            await _context.Movies.AddAsync(movie); //adding data from req to data context
+            await _context.SaveChangesAsync(); //save to data context commit to db
+            return CreatedAtAction(nameof(GetById), new {movie.Id},movie); //if success return to action GetById passing id from just saved data
         }
 
 
@@ -49,10 +49,10 @@ namespace XsisPG.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update(int id ,Movie movie) 
         {
-            if (id != movie.Id) return BadRequest();
-            _context.Entry(movie).State = EntityState.Modified;
+            if (id != movie.Id) return BadRequest(); //check existing data first, if not match return Bad Request status codes.
+            _context.Entry(movie).State = EntityState.Modified; //change stat entity context to modified 
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); //save commit 
             return NoContent();
 
         }
@@ -62,12 +62,12 @@ namespace XsisPG.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(int id) 
         {
-            var res = await _context.Movies.FindAsync(id);
-            if (res == null) return NotFound();
-            _context.Movies.Remove(res);
+            var res = await _context.Movies.FindAsync(id); //lookup to database first, by id was passing,
+            if (res == null) return NotFound(); //condition if lookup not foundor nulll then return NotFound() status  and exit func method
+            _context.Movies.Remove(res); //delete and commit using parameter "id"
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+            await _context.SaveChangesAsync(); //save and commit
+            return NoContent(); //return No Content status
         }
     }
 }
